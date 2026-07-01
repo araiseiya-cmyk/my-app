@@ -8,3 +8,4 @@ CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
   "started_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
   "applied_steps_count" INTEGER NOT NULL DEFAULT 0
 );
+

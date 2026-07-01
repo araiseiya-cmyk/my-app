@@ -3,26 +3,21 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
 
-// PostgreSQL に接続するための準備をするぞ
+// PostgreSQL に接続するためのコネクションプールとアダプターを用意する
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter, log: ["query"] });
 
 async function main() {
-  // ユーザーを 1 人作ってみる（実行するたびに増えるぞ）
-  const newUser = await prisma.user.create({
-    data: { name: `ユーザー ${new Date().toISOString()}` },
+  // ユーザーを 1 件追加して、一覧を取得する
+  await prisma.user.create({
+    data: { name: `新しいユーザー ${new Date().toISOString()}` },
   });
-  console.log("新しく追加したユーザー:", newUser);
-
-  // 登録されているユーザーを全員取ってくる
   const users = await prisma.user.findMany();
-  console.log("現在のユーザー一覧:", users);
+  console.log("ユーザー一覧:", users);
 }
 
 main()
-  .catch((e) => {
-    console.error("エラーが発生しましたぞ:", e);
-    process.exit(1);
-  })
+  .catch((e) => { console.error(e); process.exit(1); })
+  // prisma と pool の両方を閉じないとプロセスが終了しないので両方閉じる
   .finally(() => Promise.all([prisma.$disconnect(), pool.end()]));
